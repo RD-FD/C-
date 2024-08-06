@@ -76,20 +76,21 @@ namespace catalog.Pages
 
         public void OnPostCommit()
         {
-            string repoPath = Directory.GetCurrentDirectory().; // Path to your local Git repository
-            string remoteName = "startup"; // The name of the remote repository
+            string repoPath = Directory.GetCurrentDirectory(); // Path to your local Git repository
+            string remoteName = "C-"; // The name of the remote repository
             string branchName = "main"; // The branch you want to push to
-            string username = "RD-FD"; // Your remote repository username
+            string username = "rohan.deshpande@fulcrumdigital.com"; // Your remote repository username
             string password = "needWork@12"; // Your remote repository password
+            string personalAccessToken = "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";
 
             try {
-                PushChanges(repoPath, remoteName, branchName, username, password);
+                PushChanges(repoPath, remoteName, branchName, username, password, personalAccessToken);
             } catch (Exception ex) {
                 throw ex;
             }
         }
 
-        private void PushChanges(string repoPath, string remoteName, string branchName, string username, string password)
+        private void PushChanges(string repoPath, string remoteName, string branchName, string username, string password, string personalAccessToken)
         {
             try
             {
@@ -99,12 +100,12 @@ namespace catalog.Pages
                     // Create credentials for authentication
                     var credentials = new UsernamePasswordCredentials
                     {
-                        Username = username,
-                        Password = password
+                        Username = personalAccessToken,
+                        Password = string.Empty
                     };
 
                     // Find the remote
-                    var remote = repo.Network.Remotes[remoteName];
+                    var remote = repo.Network.Remotes["origin"];
                     if (remote == null)
                     {
                         Console.WriteLine($"Remote '{remoteName}' not found.");
@@ -125,16 +126,25 @@ namespace catalog.Pages
                         return;
                     }
 
-                    // Push the branch to the remote
-                    repo.Network.Push(branch, pushOptions); //repo.Network.Push(branch, pushOptions);
-                    // if (result.Status == PushStatus.UpToDate)
+                    LibGit2Sharp.Commands.Stage(repo, "*");
+
+                    // Create a commit
+                    var author = new Signature("Rohan", "rohan.deshpande@fulcrumdigital.com", DateTimeOffset.Now);
+                    var committer = author; // You can use a different signature for the committer if needed
+
+                    // Create the commit
+                    var commit = repo.Commit("commit using libgit2Sharp", author, committer);
+
+
+                    repo.Network.Push(remote, @"refs/heads/main", new PushOptions
+                    {
+                        CredentialsProvider = (_url, _user, _cred) => credentials
+                    });
+                    // var fetchOptions = new FetchOptions
                     // {
-                    //     Console.WriteLine("Push was successful.");
-                    // }
-                    // else
-                    // {
-                    //     Console.WriteLine("Push was not successful.");
-                    // }
+                    //     CredentialsProvider = (_url, _user, _cred) => credentials
+                    // };
+                    // repo.Network.Fetch(remote, fetchOptions);
                 }
             }
             catch (Exception ex)
