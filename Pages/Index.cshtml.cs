@@ -152,6 +152,11 @@ namespace catalog.Pages
                 Console.WriteLine($"An error occurred: {ex.Message}");
             }
         }
+        
+        public IActionResult OnPostPush() 
+        {
+            return RedirectToPage();
+        }
         private IRedisClient GetRedisClient()
         {
             var conString = _config.GetValue<String>("Redis:ConnectionString");

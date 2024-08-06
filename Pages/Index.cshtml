@@ -59,6 +59,10 @@
         <button>Commit</button>
     </form>
 
+    <form asp-page-handler="push" method="post">
+        <button>Push</button>
+    </form>
+
     @if (ViewData["Error"]!=null)  {
         <p style='color: red'>@ViewData["Error"]</p>
     }
