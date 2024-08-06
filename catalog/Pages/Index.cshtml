@@ -9,6 +9,7 @@
 
 <img width="40" src="~/images/cart.jpg"/> (@ViewData["cartNo"])
 <br/>
+
 <div class="text-center">
 
     <h1 class="display-5">Our Books:</h1>
@@ -53,8 +54,14 @@
     <form asp-page-handler="load" method="post">
         <button>Load Books to DB</button>
     </form>
+    <br/>
+    <form asp-page-handler="commit" method="post">
+        <button>Commit</button>
+    </form>
 
     @if (ViewData["Error"]!=null)  {
         <p style='color: red'>@ViewData["Error"]</p>
     }
+
+
 </div>

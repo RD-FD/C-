@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using ServiceStack.Redis;
+using LibGit2Sharp;
+using System.IO;
 
 namespace catalog.Pages
 {
@@ -72,6 +74,74 @@ namespace catalog.Pages
             return RedirectToPage();
         }
 
+        public void OnPostCommit()
+        {
+            string repoPath = Directory.GetCurrentDirectory().; // Path to your local Git repository
+            string remoteName = "startup"; // The name of the remote repository
+            string branchName = "main"; // The branch you want to push to
+            string username = "RD-FD"; // Your remote repository username
+            string password = "needWork@12"; // Your remote repository password
+
+            try {
+                PushChanges(repoPath, remoteName, branchName, username, password);
+            } catch (Exception ex) {
+                throw ex;
+            }
+        }
+
+        private void PushChanges(string repoPath, string remoteName, string branchName, string username, string password)
+        {
+            try
+            {
+                // Open the repository
+                using (var repo = new Repository(repoPath))
+                {
+                    // Create credentials for authentication
+                    var credentials = new UsernamePasswordCredentials
+                    {
+                        Username = username,
+                        Password = password
+                    };
+
+                    // Find the remote
+                    var remote = repo.Network.Remotes[remoteName];
+                    if (remote == null)
+                    {
+                        Console.WriteLine($"Remote '{remoteName}' not found.");
+                        return;
+                    }
+
+                    // Create a push options object
+                    var pushOptions = new PushOptions
+                    {
+                        CredentialsProvider = (url, user, cred) => credentials
+                    };
+
+                    // Get the reference to the branch
+                    var branch = repo.Branches[branchName];
+                    if (branch == null)
+                    {
+                        Console.WriteLine($"Branch '{branchName}' not found.");
+                        return;
+                    }
+
+                    // Push the branch to the remote
+                    repo.Network.Push(branch, pushOptions); //repo.Network.Push(branch, pushOptions);
+                    // if (result.Status == PushStatus.UpToDate)
+                    // {
+                    //     Console.WriteLine("Push was successful.");
+                    // }
+                    // else
+                    // {
+                    //     Console.WriteLine("Push was not successful.");
+                    // }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+        }
         private IRedisClient GetRedisClient()
         {
             var conString = _config.GetValue<String>("Redis:ConnectionString");
